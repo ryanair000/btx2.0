@@ -1428,5 +1428,83 @@
     "homePosition": 7,
     "awayPosition": 6,
     "matchType": "even"
+  },
+  {
+    "id": "Leeds_United_FC_vs_Fulham_FC-1768669100970",
+    "match": "Leeds United FC vs Fulham FC",
+    "homeTeam": "Leeds United FC",
+    "awayTeam": "Fulham FC",
+    "predicted": "Draw",
+    "confidence": 54,
+    "rawConfidence": 56,
+    "timestamp": "2026-01-17T16:58:20.970Z",
+    "homePosition": 16,
+    "awayPosition": 9,
+    "matchType": "underdog_pick"
+  },
+  {
+    "id": "Liverpool_FC_vs_Burnley_FC-1768669133634",
+    "match": "Liverpool FC vs Burnley FC",
+    "homeTeam": "Liverpool FC",
+    "awayTeam": "Burnley FC",
+    "predicted": "Home",
+    "confidence": 56,
+    "rawConfidence": 58,
+    "timestamp": "2026-01-17T16:58:53.634Z",
+    "homePosition": 4,
+    "awayPosition": 19,
+    "matchType": "home_favorite"
+  },
+  {
+    "id": "Chelsea_FC_vs_Brentford_FC-1768669146790",
+    "match": "Chelsea FC vs Brentford FC",
+    "homeTeam": "Chelsea FC",
+    "awayTeam": "Brentford FC",
+    "predicted": "Draw",
+    "confidence": 56,
+    "rawConfidence": 58,
+    "timestamp": "2026-01-17T16:59:06.790Z",
+    "homePosition": 6,
+    "awayPosition": 7,
+    "matchType": "even"
+  },
+  {
+    "id": "Chelsea_FC_vs_Brentford_FC-1768669149291",
+    "match": "Chelsea FC vs Brentford FC",
+    "homeTeam": "Chelsea FC",
+    "awayTeam": "Brentford FC",
+    "predicted": "Draw",
+    "confidence": 56,
+    "rawConfidence": 58,
+    "timestamp": "2026-01-17T16:59:09.291Z",
+    "homePosition": 6,
+    "awayPosition": 7,
+    "matchType": "even"
+  },
+  {
+    "id": "Nottingham_Forest_FC_vs_Arsenal_FC-1768669818743",
+    "match": "Nottingham Forest FC vs Arsenal FC",
+    "homeTeam": "Nottingham Forest FC",
+    "awayTeam": "Arsenal FC",
+    "predicted": "Away",
+    "confidence": 73,
+    "rawConfidence": 73,
+    "timestamp": "2026-01-17T17:10:18.743Z",
+    "homePosition": 17,
+    "awayPosition": 1,
+    "matchType": "away_favorite"
+  },
+  {
+    "id": "Brighton_&_Hove_Albion_FC_vs_AFC_Bournemouth-1768669867447",
+    "match": "Brighton & Hove Albion FC vs AFC Bournemouth",
+    "homeTeam": "Brighton & Hove Albion FC",
+    "awayTeam": "AFC Bournemouth",
+    "predicted": "Home",
+    "confidence": 73,
+    "rawConfidence": 72.72222222222223,
+    "timestamp": "2026-01-17T17:11:07.447Z",
+    "homePosition": 11,
+    "awayPosition": 15,
+    "matchType": "home_favorite"
   }
 ]

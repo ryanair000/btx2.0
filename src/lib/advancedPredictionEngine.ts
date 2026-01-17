@@ -400,10 +400,27 @@ export class AdvancedPredictionEngine {
       awayMomentum
     );
 
+    // Calculate market/elo alignment for accuracy reason
+    const marketAlignment = marketProb.marketProb ? 
+      (1 - Math.abs(probabilities.home - (marketProb.marketProb.home || 0.33))) : 0.5;
+    const eloAlignment = eloProbabilities ? 
+      (1 - Math.abs(probabilities.home - (eloProbabilities.home / 100))) : 0.5;
+
     const accuracy_reason = this.generateAccuracyReason(
       modelConfidence,
       homeFormMetrics,
-      awayFormMetrics
+      awayFormMetrics,
+      {
+        formDiff: homeFormMetrics.score - awayFormMetrics.score,
+        momentumDiff: homeMomentum - awayMomentum,
+        defenseDiff: homeDefense - awayDefense,
+        attackDiff: homeAttack - awayAttack,
+        h2hScore: h2hScore,
+        xgImpact: xgAnalysis.homeImpact - xgAnalysis.awayImpact,
+        playerImpact: playerAnalysis.homeImpact - playerAnalysis.awayImpact,
+        marketAlignment,
+        eloAlignment,
+      }
     );
 
     // ===== BETTING MARKETS ANALYSIS =====
@@ -1339,26 +1356,88 @@ export class AdvancedPredictionEngine {
   }
 
   /**
-   * IMPROVED: Accuracy reason based on multiple factors
+   * IMPROVED: Dynamic accuracy reason based on actual prediction factors
    */
   private generateAccuracyReason(
     confidence: number,
     homeFormMetrics: any,
-    awayFormMetrics: any
+    awayFormMetrics: any,
+    metrics?: {
+      formDiff: number;
+      momentumDiff: number;
+      defenseDiff: number;
+      attackDiff: number;
+      h2hScore: number;
+      xgImpact: number;
+      playerImpact: number;
+      marketAlignment: number;
+      eloAlignment: number;
+    }
   ): string {
-    if (confidence < 50) {
-      return "This is a very tight matchup with limited data to separate the teams clearly.";
+    const reasons: string[] = [];
+    
+    // Form analysis
+    if (homeFormMetrics.trend === "improving") {
+      reasons.push("Home team on an improving run");
+    } else if (homeFormMetrics.trend === "declining") {
+      reasons.push("Home team's form declining");
     }
-
-    if (homeFormMetrics.trend === "improving" || homeFormMetrics.trend === "declining") {
-      return "Clear form trends from both teams support this prediction with good confidence.";
+    
+    if (awayFormMetrics.trend === "improving") {
+      reasons.push("Away team gaining momentum");
+    } else if (awayFormMetrics.trend === "declining") {
+      reasons.push("Away team struggling recently");
     }
-
-    if (confidence > 70) {
-      return "Strong data signals and form consistency support a high-confidence prediction.";
+    
+    // Win rate comparison
+    const formDiff = homeFormMetrics.winRate - awayFormMetrics.winRate;
+    if (Math.abs(formDiff) > 0.3) {
+      reasons.push(`Clear form advantage (${Math.round(Math.abs(formDiff) * 100)}% win rate difference)`);
+    } else if (Math.abs(formDiff) < 0.1) {
+      reasons.push("Similar recent form makes prediction less certain");
     }
-
-    return "Moderate confidence based on available form data and head-to-head history.";
+    
+    // Metrics-based reasons
+    if (metrics) {
+      if (Math.abs(metrics.h2hScore) > 0.15) {
+        reasons.push(metrics.h2hScore > 0 ? "Historical H2H favors home" : "Historical H2H favors away");
+      }
+      
+      if (Math.abs(metrics.xgImpact) > 0.1) {
+        reasons.push(metrics.xgImpact > 0 ? "xG data supports home advantage" : "xG data supports away advantage");
+      }
+      
+      if (Math.abs(metrics.playerImpact) > 0.1) {
+        reasons.push("Player availability affecting prediction");
+      }
+      
+      if (metrics.marketAlignment > 0.7) {
+        reasons.push("Model aligns with betting market odds");
+      } else if (metrics.marketAlignment < 0.3) {
+        reasons.push("Model disagrees with market - potential value");
+      }
+      
+      if (metrics.eloAlignment > 0.7) {
+        reasons.push("Elo ratings support this prediction");
+      }
+    }
+    
+    // Confidence-based summary
+    if (reasons.length === 0) {
+      if (confidence >= 70) {
+        return "Strong data signals across multiple factors support a high-confidence prediction.";
+      } else if (confidence >= 55) {
+        return "Moderate data quality with some clear indicators pointing to this outcome.";
+      } else {
+        return "Limited separation between teams - this is a close matchup with higher uncertainty.";
+      }
+    }
+    
+    // Build dynamic reason
+    const topReasons = reasons.slice(0, 3);
+    const confidenceDesc = confidence >= 70 ? "High confidence" : confidence >= 55 ? "Moderate confidence" : "Lower confidence";
+    
+    return `${confidenceDesc}: ${topReasons.join(". ")}${topReasons.length > 0 ? "." : ""}`;
   }
 
   /**

@@ -177,7 +177,7 @@ export function PredictionCard({ predictions, selectedMatch }: PredictionCardPro
           <DeepAnalysisSection analysis={predictions.deepAnalysis} expandedSection={expandedSection} setExpandedSection={setExpandedSection} />
         )}
 
-        <AccuracyExplanation reason={predictions.accuracy_reason} />
+        <AccuracyExplanation reason={predictions.accuracy_reason} metrics={predictions.metrics} />
       </div>
     </div>
   );
@@ -690,11 +690,85 @@ function DeepAnalysisSection({
   );
 }
 
-function AccuracyExplanation({ reason }: { reason: string }) {
+function AccuracyExplanation({ reason, metrics }: { reason: string; metrics?: PredictionResult["metrics"] }) {
+  // Factor breakdown data
+  const factors = metrics ? [
+    { name: "Form", value: metrics.formScore, icon: "📈" },
+    { name: "Momentum", value: metrics.momentumScore, icon: "🚀" },
+    { name: "Defense", value: metrics.defensiveScore, icon: "🛡️" },
+    { name: "Attack", value: metrics.attackingScore, icon: "⚽" },
+    { name: "H2H History", value: metrics.h2hScore, icon: "📊" },
+    { name: "xG Data", value: metrics.xgImpact || 0, icon: "🎯" },
+    { name: "Players", value: metrics.playerImpact || 0, icon: "👥" },
+  ].filter(f => f.value !== undefined) : [];
+
+  const getBarColor = (value: number) => {
+    if (value > 0.1) return "bg-blue-500";
+    if (value < -0.1) return "bg-purple-500";
+    return "bg-gray-400";
+  };
+
+  const getLabel = (value: number) => {
+    if (value > 0.2) return "Home ++";
+    if (value > 0.1) return "Home +";
+    if (value < -0.2) return "Away ++";
+    if (value < -0.1) return "Away +";
+    return "Even";
+  };
+
   return (
-    <div className="bg-white rounded-lg p-4 border border-gray-200">
-      <p className="text-sm text-gray-600 mb-2">Why this accuracy level?</p>
-      <p className="text-gray-700">{reason}</p>
+    <div className="bg-white rounded-lg p-6 border border-gray-200">
+      <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <span className="text-lg">🔍</span> Why This Prediction?
+      </h3>
+      <p className="text-gray-700 mb-4">{reason}</p>
+      
+      {factors.length > 0 && (
+        <div className="space-y-3 mt-4">
+          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Factor Breakdown</p>
+          {factors.map((factor, idx) => {
+            const absValue = Math.abs(factor.value);
+            const width = Math.min(absValue * 200, 100); // Scale for visibility
+            const isHome = factor.value > 0;
+            
+            return (
+              <div key={idx} className="flex items-center gap-3">
+                <span className="text-sm w-6">{factor.icon}</span>
+                <span className="text-sm text-gray-600 w-20">{factor.name}</span>
+                <div className="flex-1 flex items-center gap-2">
+                  {/* Away bar (left side) */}
+                  <div className="flex-1 flex justify-end">
+                    <div 
+                      className={`h-2 rounded-l transition-all ${!isHome ? 'bg-purple-500' : 'bg-gray-200'}`}
+                      style={{ width: `${!isHome ? width : 0}%` }}
+                    />
+                  </div>
+                  {/* Center marker */}
+                  <div className="w-px h-4 bg-gray-400" />
+                  {/* Home bar (right side) */}
+                  <div className="flex-1">
+                    <div 
+                      className={`h-2 rounded-r transition-all ${isHome ? 'bg-blue-500' : 'bg-gray-200'}`}
+                      style={{ width: `${isHome ? width : 0}%` }}
+                    />
+                  </div>
+                </div>
+                <span className={`text-xs w-16 text-right font-medium ${
+                  factor.value > 0.1 ? 'text-blue-600' : 
+                  factor.value < -0.1 ? 'text-purple-600' : 
+                  'text-gray-500'
+                }`}>
+                  {getLabel(factor.value)}
+                </span>
+              </div>
+            );
+          })}
+          <div className="flex justify-between text-xs text-gray-400 mt-2 px-8">
+            <span>← Away Advantage</span>
+            <span>Home Advantage →</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
