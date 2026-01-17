@@ -211,7 +211,6 @@ async function fetchFromNewsAPI(teamName: string, daysBack: number): Promise<New
       url: a.url || '',
     }));
 
-    newsCache.set(cacheKey, { data: articles, timestamp: Date.now() });
     console.log(`[NEWS] Fetched ${articles.length} articles for ${teamName}`);
     return articles;
   } catch (error) {

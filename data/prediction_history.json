@@ -1506,5 +1506,18 @@
     "homePosition": 11,
     "awayPosition": 15,
     "matchType": "home_favorite"
+  },
+  {
+    "id": "Manchester_United_FC_vs_Newcastle_United_FC-1768670833527",
+    "match": "Manchester United FC vs Newcastle United FC",
+    "homeTeam": "Manchester United FC",
+    "awayTeam": "Newcastle United FC",
+    "predicted": "Draw",
+    "confidence": 55,
+    "rawConfidence": 57,
+    "timestamp": "2026-01-17T17:27:13.527Z",
+    "homePosition": 5,
+    "awayPosition": 9,
+    "matchType": "underdog_pick"
   }
 ]
