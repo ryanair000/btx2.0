@@ -46,15 +46,81 @@ const NEWS_KEYWORDS = {
 };
 
 // NewsAPI configuration (free tier: 100 requests/day)
-const NEWS_API_KEY = process.env.NEWS_API_KEY || process.env.NEXT_PUBLIC_NEWS_API_KEY;
+// Try multiple environment variable names for compatibility
+const NEWS_API_KEY = process.env.NEWS_API_KEY || 
+                     process.env.NEXT_PUBLIC_NEWS_API_KEY || 
+                     '';
+const GNEWS_API_KEY = process.env.GNEWS_API_KEY || '';
+const MEDIASTACK_API_KEY = process.env.MEDIASTACK_API_KEY || '';
+
 const NEWS_API_URL = 'https://newsapi.org/v2/everything';
+const GNEWS_API_URL = 'https://gnews.io/api/v4/search';
+const MEDIASTACK_API_URL = 'http://api.mediastack.com/v1/news';
 
 // Cache news for 6 hours
 const newsCache = new Map<string, { data: NewsArticle[]; timestamp: number }>();
 const CACHE_TTL = 21600000; // 6 hours
 
 /**
- * Fetch news for a team
+ * Fetch news from GNews API (backup source)
+ */
+async function fetchFromGNews(teamName: string): Promise<NewsArticle[]> {
+  if (!GNEWS_API_KEY) return [];
+  
+  try {
+    const query = encodeURIComponent(`"${teamName}" Premier League`);
+    const response = await fetch(
+      `${GNEWS_API_URL}?q=${query}&lang=en&max=10&token=${GNEWS_API_KEY}`
+    );
+    
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    return (data.articles || []).map((a: any) => ({
+      title: a.title || '',
+      description: a.description || '',
+      content: a.content || a.description || '',
+      source: a.source?.name || 'GNews',
+      publishedAt: a.publishedAt || new Date().toISOString(),
+      url: a.url || '',
+    }));
+  } catch (error) {
+    console.warn('[NEWS] GNews fetch failed:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch news from MediaStack API (backup source)
+ */
+async function fetchFromMediaStack(teamName: string): Promise<NewsArticle[]> {
+  if (!MEDIASTACK_API_KEY) return [];
+  
+  try {
+    const query = encodeURIComponent(teamName);
+    const response = await fetch(
+      `${MEDIASTACK_API_URL}?access_key=${MEDIASTACK_API_KEY}&keywords=${query}&languages=en&limit=10`
+    );
+    
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    return (data.data || []).map((a: any) => ({
+      title: a.title || '',
+      description: a.description || '',
+      content: a.description || '',
+      source: a.source || 'MediaStack',
+      publishedAt: a.published_at || new Date().toISOString(),
+      url: a.url || '',
+    }));
+  } catch (error) {
+    console.warn('[NEWS] MediaStack fetch failed:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch news for a team - tries multiple sources
  */
 async function fetchTeamNews(teamName: string, daysBack = 3): Promise<NewsArticle[]> {
   const cacheKey = `${teamName}_${daysBack}`;
@@ -65,7 +131,49 @@ async function fetchTeamNews(teamName: string, daysBack = 3): Promise<NewsArticl
     return cached.data;
   }
 
-  // Fallback to free sources if no API key
+  // Try NewsAPI first
+  if (NEWS_API_KEY) {
+    const articles = await fetchFromNewsAPI(teamName, daysBack);
+    if (articles.length > 0) {
+      newsCache.set(cacheKey, { data: articles, timestamp: Date.now() });
+      return articles;
+    }
+  }
+  
+  // Try GNews as backup
+  if (GNEWS_API_KEY) {
+    console.log('[NEWS] Trying GNews...');
+    const articles = await fetchFromGNews(teamName);
+    if (articles.length > 0) {
+      newsCache.set(cacheKey, { data: articles, timestamp: Date.now() });
+      return articles;
+    }
+  }
+  
+  // Try MediaStack as backup
+  if (MEDIASTACK_API_KEY) {
+    console.log('[NEWS] Trying MediaStack...');
+    const articles = await fetchFromMediaStack(teamName);
+    if (articles.length > 0) {
+      newsCache.set(cacheKey, { data: articles, timestamp: Date.now() });
+      return articles;
+    }
+  }
+  
+  // Final fallback: RSS
+  if (!NEWS_API_KEY && !GNEWS_API_KEY && !MEDIASTACK_API_KEY) {
+    console.log('[NEWS] No API keys configured, using RSS fallback');
+  } else {
+    console.log('[NEWS] All APIs failed, using RSS fallback');
+  }
+  
+  return fetchNewsFromRSS(teamName);
+}
+
+/**
+ * Fetch news from NewsAPI
+ */
+async function fetchFromNewsAPI(teamName: string, daysBack: number): Promise<NewsArticle[]> {
   if (!NEWS_API_KEY) {
     console.log('[NEWS] No API key, using RSS fallback');
     return fetchNewsFromRSS(teamName);
