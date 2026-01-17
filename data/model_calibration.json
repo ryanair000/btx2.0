@@ -1,0 +1,60 @@
+{
+  "factors": {
+    "40-50": 9,
+    "50-60": -2,
+    "60-70": -4,
+    "70-80": 0,
+    "80-90": 0
+  },
+  "bucketStats": {
+    "40-50": {
+      "total": 26,
+      "correct": 16,
+      "accuracy": 62
+    },
+    "50-60": {
+      "total": 24,
+      "correct": 12,
+      "accuracy": 50
+    },
+    "60-70": {
+      "total": 7,
+      "correct": 4,
+      "accuracy": 57
+    },
+    "70-80": {
+      "total": 3,
+      "correct": 2,
+      "accuracy": 67
+    },
+    "80-90": {
+      "total": 0,
+      "correct": 0,
+      "accuracy": 0
+    }
+  },
+  "matchTypeStats": {
+    "home_favorite": {
+      "total": 15,
+      "correct": 10,
+      "accuracy": 67
+    },
+    "away_favorite": {
+      "total": 15,
+      "correct": 7,
+      "accuracy": 47
+    },
+    "even": {
+      "total": 15,
+      "correct": 8,
+      "accuracy": 53
+    },
+    "underdog_pick": {
+      "total": 15,
+      "correct": 9,
+      "accuracy": 60
+    }
+  },
+  "lastUpdated": "2026-01-16T20:02:54.054Z",
+  "totalResults": 60
+}

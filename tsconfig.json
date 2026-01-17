@@ -30,5 +30,13 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "data/**/*",
+    "archive/**/*",
+    "archive_2/**/*",
+    "scripts/**/*",
+    ".next",
+    "out"
+  ]
 }

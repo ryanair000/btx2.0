@@ -11,7 +11,18 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "dist/**",
     "next-env.d.ts",
+    // Data directories
+    "data/**",
+    "archive/**",
+    "archive_2/**",
+    "scripts/**",
+    // Other
+    "*.csv",
+    "*.json",
+    "!package.json",
+    "!tsconfig.json",
   ]),
 ]);
 

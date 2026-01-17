@@ -32,10 +32,18 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Data files (keep in repo but ignore large ones)
+data/statsbomb/
